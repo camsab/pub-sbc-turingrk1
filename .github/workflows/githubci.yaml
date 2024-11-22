@@ -1,14 +1,17 @@
 name: sbc-turingrk1
 
 on:
+  workflow_dispatch:
   push:
     branches: [ 'main', 'release-*' ]
     tags:
       - "v*"
-
+env:
+  REGISTRY: registry.camsab.me:443
+  USER: "talos"
 jobs:
   sbc:
-    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    runs-on: home-runners
 
     permissions:
       contents: read
@@ -22,23 +25,37 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
         with:
-          buildkitd-config: .github/buildkitd.toml
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          buildkitd-config-inline: |
+            [registry."docker-registry.registry.svc.cluster.local:5000"]
+              http = true
+            [worker.oci]
+            gc = true
+            gckeepstorage = 50000
+          
+            [[worker.oci.gcpolicy]]
+              keepBytes = 10737418240
+              keepDuration = 604800
+              filters = [ "type==source.local", "type==exec.cachemount", "type==source.git.checkout"]
+            [[worker.oci.gcpolicy]]
+              all = true
+              keepBytes = 53687091200
+          driver: kubernetes
+          driver-opts: |
+            namespace=actions-runner
+            replicas=1
+            nodeselector=model=rk1
+            limits.memory=2G
+            limits.ephemeral-storage=2G
 
       - name: Build and push sbc turingrk1 overlay image
         run: make
         env:
           PUSH: '1'
           USERNAME: ${{ github.actor }}
-          PLATFORM: linux/arm64,linux/amd64
+          PLATFORM: linux/arm64
           PROGRESS: plain
-          CI_ARGS: "--cache-from=ghcr.io/${{ github.actor }}/sbc-turingrk1:cache --cache-to=ghcr.io/${{ github.actor }}/sbc-turingrk1:cache"
+          CI_ARGS: "--cache-from=${{ env.REGISTRY }}/${{ env.USER }}/sbc-turingrk1:cache --cache-to=${{ env.REGISTRY }}/${{ env.USER }}/sbc-turingrk1:cache"
 
