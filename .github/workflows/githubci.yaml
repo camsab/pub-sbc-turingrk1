@@ -24,7 +24,8 @@ jobs:
           # need history for `git describe` to work for Talos `Makefile`
           fetch-depth: 0
           fetch-tags: true
-
+      - name: Install make
+        run: sudo apt-get update && sudo apt-get install make
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
