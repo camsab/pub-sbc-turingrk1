@@ -16,8 +16,8 @@ GOARCH := $(shell uname -m | tr '[:upper:]' '[:lower:]')
 ifeq ($(GOARCH),x86_64)
   GOARCH := amd64
 endif
-REGISTRY ?= ghcr.io
-USERNAME ?= nberlee
+REGISTRY ?= registry.camsab.me
+USERNAME ?= talos
 REGISTRY_AND_USERNAME ?= $(REGISTRY)/$(USERNAME)
 KRES_IMAGE ?= ghcr.io/siderolabs/kres:latest
 CONFORMANCE_IMAGE ?= ghcr.io/siderolabs/conform:latest
