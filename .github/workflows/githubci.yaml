@@ -3,7 +3,7 @@ name: sbc-turingrk1
 on:
   workflow_dispatch:
   push:
-    branches: [ 'main', 'release-*' ]
+    branches: [ 'release-*' ]
     tags:
       - "v*"
 env:
