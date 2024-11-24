@@ -55,7 +55,6 @@ jobs:
         run: make
         env:
           PUSH: '1'
-          USERNAME: ${{ github.actor }}
           PLATFORM: linux/arm64
           PROGRESS: plain
           CI_ARGS: "--cache-from=${{ env.REGISTRY }}/${{ env.USER }}/sbc-turingrk1:cache --cache-to=${{ env.REGISTRY }}/${{ env.USER }}/sbc-turingrk1:cache"
